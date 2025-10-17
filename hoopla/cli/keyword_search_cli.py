@@ -10,19 +10,18 @@ def load_data(filename: str = "movies.json") -> List[Dict[str, Any]]:
     base = Path(__file__).resolve().parents[1]  # .../hoopla
     data_path = base / "data" / filename
 
+
     with data_path.open("r", encoding="utf-8") as fh:
         data = json.load(fh)
 
-    # Convert to list if it's a dictionary
-    if isinstance(data, dict):
-        data = list(data.values())
+    # Extract the movies list from the dictionary
+    if isinstance(data, dict) and "movies" in data:
+        data = data["movies"]
 
-    # Sort by id in descending order
     try:
-        return sorted(data, key=lambda x: int(x.get("id", 0)), reverse=True)
+        return sorted(data, key=lambda x: int(x.get("id", 0)), reverse=False)
     except:
         return data
-
 def search_records(records: List[Dict[str, Any]], query: str) -> List[Dict[str, Any]]:
     """
     Simple search function that looks for query in title or description.
@@ -37,13 +36,11 @@ def search_records(records: List[Dict[str, Any]], query: str) -> List[Dict[str, 
             continue
 
         title = record.get("title", "").lower()
-        description = record.get("description", "").lower()
 
-        if query in title or query in description:
+        if query in title:
             results.append(record)
 
-    return results
-
+    return sorted(results, key=lambda x: int(x.get("id", 0)))
 def main() -> None:
     parser = argparse.ArgumentParser(description="Simple Keyword Search CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -62,12 +59,13 @@ def main() -> None:
                 records = load_data(args.data_file)
                 results = search_records(records, args.query)
                 print(f"Found {len(results)} matching records")
-                for record in results[:10]:
-                    print(f" - id={record.get('id')} title={record.get('title')}")
+                for idx, record in enumerate(results[:5], 1):
+                    print(f"{idx}. {record.get('title')}")
             except FileNotFoundError:
                 print(f"Data file not found: hoopla/data/{args.data_file}")
         case _:
             parser.print_help()
+
 
 if __name__ == "__main__":
     main()
