@@ -32,6 +32,10 @@ def search_records(records: List[Dict[str, Any]], query: str) -> List[Dict[str, 
     results = []
 
     for record in records:
+        # Skip if record is not a dictionary
+        if not isinstance(record, dict):
+            continue
+
         title = record.get("title", "").lower()
         description = record.get("description", "").lower()
 
