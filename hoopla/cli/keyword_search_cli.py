@@ -6,6 +6,27 @@ import string
 from pathlib import Path
 from typing import Any, Dict, List
 
+
+def isPartialMatch(record: str, query: str) -> bool:
+    """
+    Check if the query is a partial match in the title or description of the record.
+    """
+
+    tokensTitle = record.split()
+    tokensQuery = query.split()
+
+    # REMOVE empty tokens
+    tokensTitle = [token for token in tokensTitle if token]
+    tokensQuery = [token for token in tokensQuery if token]
+    for qtoken in tokensQuery:
+        for ttoken in tokensTitle:
+            if qtoken in ttoken:
+                return True
+
+
+    return False
+
+
 def load_data(filename: str = "movies.json") -> List[Dict[str, Any]]:
     """Load JSON from data directory and sort by id in descending order"""
     base = Path(__file__).resolve().parents[1]  # .../hoopla
@@ -29,7 +50,7 @@ def search_records(records: List[Dict[str, Any]], query: str) -> List[Dict[str, 
     Returns matches sorted by id in descending order.
     """
     query = query.lower()
-    removedPuntuationQuery = query.translate(str.maketrans('', '', string.punctuation))
+    santitizedQuery = query.translate(str.maketrans('', '', string.punctuation))
     results = []
 
     for record in records:
@@ -38,9 +59,9 @@ def search_records(records: List[Dict[str, Any]], query: str) -> List[Dict[str, 
             continue
 
         title = record.get("title", "").lower()
-        sanitizedTitle = title.translate(removedPuntuationQuery)
+        sanitized_title = title.translate(str.maketrans('', '', string.punctuation))
 
-        if removedPuntuationQuery in sanitizedTitle:
+        if isPartialMatch(sanitized_title, santitizedQuery):
             results.append(record)
 
     return sorted(results, key=lambda x: int(x.get("id", 0)))
@@ -72,3 +93,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
