@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import string
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -28,6 +29,7 @@ def search_records(records: List[Dict[str, Any]], query: str) -> List[Dict[str, 
     Returns matches sorted by id in descending order.
     """
     query = query.lower()
+    removedPuntuationQuery = query.translate(str.maketrans('', '', string.punctuation))
     results = []
 
     for record in records:
@@ -36,8 +38,9 @@ def search_records(records: List[Dict[str, Any]], query: str) -> List[Dict[str, 
             continue
 
         title = record.get("title", "").lower()
+        sanitizedTitle = title.translate(removedPuntuationQuery)
 
-        if query in title:
+        if removedPuntuationQuery in sanitizedTitle:
             results.append(record)
 
     return sorted(results, key=lambda x: int(x.get("id", 0)))
