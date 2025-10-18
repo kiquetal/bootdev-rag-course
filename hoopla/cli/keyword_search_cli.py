@@ -5,7 +5,7 @@ import json
 import string
 from pathlib import Path
 from typing import Any, Dict, List
-
+from nltk.stem import PorterStemmer
 
 def isPartialMatch(record: str, query: str) -> bool:
     """
@@ -26,6 +26,12 @@ def isPartialMatch(record: str, query: str) -> bool:
     tokensTitle = [token for token in tokensTitle if token not in stopwords]
     tokensQuery = [token for token in tokensQuery if token]
     tokensQuery = [token for token in tokensQuery if token not in stopwords]
+
+    # STEMMING
+    ps = PorterStemmer()
+    tokensTitle = [ps.stem(token) for token in tokensTitle]
+    tokensQuery = [ps.stem(token) for token in tokensQuery]
+
     for qtoken in tokensQuery:
         for ttoken in tokensTitle:
             if qtoken in ttoken:
