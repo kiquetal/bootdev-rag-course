@@ -13,6 +13,8 @@ This project is part of the Bootdev Retrieval-Augmented Generation (RAG) course.
 ### Tokenization-Based Search
 - ✅ Implemented basic tokenization for improved search relevance
 - ✅ Search algorithm now matches on individual tokens instead of exact string matches
+- ✅ Added stopwords filtering to improve search quality
+- ✅ Implemented punctuation removal for better token matching
 
 ## Understanding Tokenization
 
@@ -31,11 +33,14 @@ Tokenization is a fundamental technique in information retrieval and natural lan
    - Simple whitespace/punctuation-based tokenization
    - Case-insensitive matching
    - Relevance scoring based on token match frequency
+   - Stopwords removal using a dedicated stopwords list
+   - Partial token matching (finding query tokens within title tokens)
 
 ## Project Structure
 ```
 hoopla/
 ├── data/           # JSON data files
+│   └── stopwords.txt  # List of common words to filter out
 ├── cli/            # Command-line interface tools
 │   └── keyword_search_cli.py  # Simple tokenized search implementation
 └── README.md       # This documentation
@@ -53,4 +58,3 @@ This will search through the data using tokenization and return the most relevan
 - Implement more advanced text processing (stemming, lemmatization)
 - Add vector embeddings for semantic search
 - Create a full RAG pipeline with LLM integration
-
