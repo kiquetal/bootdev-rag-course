@@ -15,9 +15,17 @@ def isPartialMatch(record: str, query: str) -> bool:
     tokensTitle = record.split()
     tokensQuery = query.split()
 
+    # read file stopwords.txt
+    base = Path(__file__).resolve().parents[1]  # .../hoop
+    stopwords_path = base / "data" / "stopwords.txt"
+    with stopwords_path.open("r", encoding="utf-8") as fh:
+        stopwords = set(line.strip() for line in fh)
+
     # REMOVE empty tokens
     tokensTitle = [token for token in tokensTitle if token]
+    tokensTitle = [token for token in tokensTitle if token not in stopwords]
     tokensQuery = [token for token in tokensQuery if token]
+    tokensQuery = [token for token in tokensQuery if token not in stopwords]
     for qtoken in tokensQuery:
         for ttoken in tokensTitle:
             if qtoken in ttoken:
