@@ -16,7 +16,12 @@ This project is part of the Bootdev Retrieval-Augmented Generation (RAG) course.
 - ✅ Added stopwords filtering to improve search quality
 - ✅ Implemented punctuation removal for better token matching
 
-## Understanding Tokenization
+### Advanced Text Processing
+- ✅ Implemented stemming using NLTK's PorterStemmer
+- ✅ Enhanced partial token matching to find query terms within document terms
+- ✅ Improved sanitization of text by removing punctuation
+
+## Understanding Tokenization and Text Processing
 
 Tokenization is a fundamental technique in information retrieval and natural language processing that involves breaking text into smaller units called tokens. In our implementation:
 
@@ -36,13 +41,19 @@ Tokenization is a fundamental technique in information retrieval and natural lan
    - Stopwords removal using a dedicated stopwords list
    - Partial token matching (finding query tokens within title tokens)
 
+4. **Stemming implementation:**
+   - Uses Porter Stemming algorithm via NLTK
+   - Reduces words to their root form (e.g., "running" → "run")
+   - Allows matching different forms of the same word
+   - Applied to both query tokens and document tokens for consistent matching
+
 ## Project Structure
 ```
 hoopla/
 ├── data/           # JSON data files
 │   └── stopwords.txt  # List of common words to filter out
 ├── cli/            # Command-line interface tools
-│   └── keyword_search_cli.py  # Simple tokenized search implementation
+│   └── keyword_search_cli.py  # Tokenized search with stemming implementation
 └── README.md       # This documentation
 ```
 
@@ -52,9 +63,9 @@ To use the search functionality:
 python -m hoopla.cli.keyword_search_cli search <query>
 ```
 
-This will search through the data using tokenization and return the most relevant results.
+This will search through the data using tokenization, stemming, and return the most relevant results.
 
 ## Next Steps
-- Implement more advanced text processing (stemming, lemmatization)
 - Add vector embeddings for semantic search
+- Implement TF-IDF scoring for better relevance ranking
 - Create a full RAG pipeline with LLM integration
