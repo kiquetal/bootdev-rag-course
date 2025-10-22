@@ -24,7 +24,33 @@ class InvertedIndex:
 
 
 
+    def __add_document(self,doc_id: int, text: str) -> None:
+        """
+        Add a document to the inverted index.
+        First tokenize then add each token to the index.
+        """
+        text_lower = text.lower()
+        tokens = text_lower.split()
+        tokens = [token for token in tokens if token]  # REMOVE empty tokens
+        for token in tokens:
+            if token not in self.index:
+                self.index[token] = []
+            if doc_id not in self.index[token]:
+                self.index[token].append(doc_id)
 
+    def get_document(self, term: str) -> List[int]:
+        """
+        Get list of document ids containing the term.
+        """
+        return self.index.get(term, [])
+
+    def build(self)-> None:
+        """
+        Build the inverted index from the docmap.
+        """
+        for doc_id, payload in self.docmap.items():
+            text = payload.get("title", "") + " " + payload.get("description", "")
+            self.__add_document(doc_id, text)
 
 def isPartialMatch(record: str, query: str) -> bool:
     """
