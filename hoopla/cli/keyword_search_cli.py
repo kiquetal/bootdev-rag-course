@@ -3,6 +3,7 @@
 import argparse
 import json
 import string
+import pickle
 from pathlib import Path
 from typing import Any, Dict, List
 from nltk.stem import PorterStemmer
@@ -22,6 +23,15 @@ class InvertedIndex:
         self.index: Dict[str, List[int]] = {}
         self.docmap: Dict[int, List[str]] = {}
 
+    def save(self, filename: str) -> None:
+        """
+        Save the inverted index to disk using pickle serialization.
+
+        Args:
+            filename: The path where the index should be saved
+        """
+        with open(filename, 'wb') as f:
+            pickle.dump({'index': self.index, 'docmap': self.docmap}, f)
 
 
     def __add_document(self,doc_id: int, text: str) -> None:
@@ -42,7 +52,9 @@ class InvertedIndex:
         """
         Get list of document ids containing the term.
         """
-        return self.index.get(term, [])
+        pre_list = self.index.get(term.lower(), [])
+        pre_list.sort()
+        return pre_list
 
     def build(self)-> None:
         """
@@ -103,6 +115,7 @@ def load_data(filename: str = "movies.json") -> List[Dict[str, Any]]:
         return sorted(data, key=lambda x: int(x.get("id", 0)), reverse=False)
     except:
         return data
+
 def search_records(records: List[Dict[str, Any]], query: str) -> List[Dict[str, Any]]:
     """
     Simple search function that looks for query in title or description.
@@ -152,4 +165,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
