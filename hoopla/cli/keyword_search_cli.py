@@ -7,6 +7,25 @@ from pathlib import Path
 from typing import Any, Dict, List
 from nltk.stem import PorterStemmer
 
+
+
+class InvertedIndex:
+    """
+    Minimal inverted index container.
+
+    Attributes:
+        index: Mapping from term -> list of document ids containing the term.
+        docmap: Mapping from document id -> original document payload.
+    """
+
+    def __init__(self) -> None:
+        self.index: Dict[str, List[int]] = {}
+        self.docmap: Dict[int, List[str]] = {}
+
+
+
+
+
 def isPartialMatch(record: str, query: str) -> bool:
     """
     Check if the query is a partial match in the title or description of the record.
