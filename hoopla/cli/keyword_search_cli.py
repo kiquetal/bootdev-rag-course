@@ -57,7 +57,7 @@ class InvertedIndex:
             self.index[token].add(doc_id)
 
 
-    def get_document(self, term: str) -> List[int]:
+    def get_documents(self, term: str) -> List[int]:
         """
         Get list of document ids containing the term.
         """
