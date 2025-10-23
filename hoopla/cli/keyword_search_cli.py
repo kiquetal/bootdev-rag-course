@@ -46,10 +46,8 @@ class InvertedIndex:
 
         table = str.maketrans('', '', string.punctuation)
         tokens = [token.translate(table) for token in tokens]
-        # normalize unicode characters '
-
-
-
+        # replace the ` with '
+        tokens = [token.replace('`', "'") for token in tokens]
 
         tokens = [token for token in tokens if token]  # REMOVE empty tokens
         for token in tokens:
