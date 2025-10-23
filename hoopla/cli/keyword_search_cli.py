@@ -205,6 +205,8 @@ def main() -> None:
     search_parser.add_argument("--data-file", type=str, default="movies.json",
                               help="JSON filename located in hoopla/data (default: movies.json)")
     build_parser = subparsers.add_parser("build", help="Build the inverted index and save to cache")
+    build_parser.add_argument("--data-file", type=str, default="movies.json",
+                              help="JSON filename located in hoopla/data (default: movies.json)")
 
 
     args = parser.parse_args()
