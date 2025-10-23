@@ -23,15 +23,24 @@ class InvertedIndex:
         self.index: Dict[str, set[int]] = {}
         self.docmap: Dict[int, Dict[str, Any]] = {}
 
-    def save(self, filename: str) -> None:
+    def save(self) -> None:
         """
-        Save the inverted index to disk using pickle serialization.
+        Save the index using the pattern cache/index.pkl
+        Save the docmap using the pattern cache/docmap.pkl
 
-        Args:
-            filename: The path where the index should be saved
+
         """
-        with open(filename, 'wb') as f:
-            pickle.dump({'index': self.index, 'docmap': self.docmap}, f)
+        # check if cache directory exists
+        base = Path(__file__).resolve().parents[1]  # .../hoop
+        cache_path = base / "cache"
+        if not cache_path.exists():
+            cache_path.mkdir(parents=True, exist_ok=True)
+        index_path = cache_path / "index.pkl"
+        docmap_path = cache_path / "docmap.pkl"
+        with index_path.open("wb") as fh:
+            pickle.dump(self.index, fh)
+        with docmap_path.open("wb") as fh:
+            pickle.dump(self.docmap, fh)
 
 
     def __add_document(self, doc_id: int, text: str) -> None:
@@ -60,8 +69,25 @@ class InvertedIndex:
     def get_documents(self, term: str) -> List[int]:
         """
         Get list of document ids containing the term.
+        Apply the same normalization/tokenization as __add_document and
+        return the union of postings for all tokens in the term.
         """
-        postings = self.index.get(term.lower(), set())
+        if not term:
+            return []
+
+        # follow the same transform steps used in __add_document
+        term_lower = term.lower()
+        tokens = term_lower.split()
+
+        table = str.maketrans('', '', string.punctuation)
+        tokens = [token.translate(table) for token in tokens]
+        tokens = [token.replace('`', "'") for token in tokens]
+        tokens = [token for token in tokens if token]  # remove empty tokens
+
+        postings: set[int] = set()
+        for token in tokens:
+            postings |= self.index.get(token, set())
+
         return sorted(postings)
 
     def build(self)-> None:
@@ -178,6 +204,8 @@ def main() -> None:
     search_parser.add_argument("query", type=str, help="Search query")
     search_parser.add_argument("--data-file", type=str, default="movies.json",
                               help="JSON filename located in hoopla/data (default: movies.json)")
+    build_parser = subparsers.add_parser("build", help="Build the inverted index and save to cache")
+
 
     args = parser.parse_args()
 
@@ -192,6 +220,13 @@ def main() -> None:
                     print(f"{idx}. {record.get('title')}")
             except FileNotFoundError:
                 print(f"Data file not found: hoopla/data/{args.data_file}")
+        case "build":
+            print("Building inverted index...")
+            index = InvertedIndex()
+            index.build()
+            index.save()
+            docs = index.get_documents("merida")
+            print(f"First document for token 'merida': {docs[0] if docs else 'No documents found'}")
         case _:
             parser.print_help()
 
