@@ -23,6 +23,27 @@ class InvertedIndex:
         self.index: Dict[str, set[int]] = {}
         self.docmap: Dict[int, Dict[str, Any]] = {}
 
+    def load(self):
+        """
+        Load the index from the pattern cache/index.pkl
+        Load the docmap from the pattern cache/docmap.pkl
+        """
+        base = Path(__file__).resolve().parents[1]  # .../hoop
+        cache_path = base / "cache"
+        index_path = cache_path / "index.pkl"
+        docmap_path = cache_path / "docmap.pkl"
+
+        # Raise error if files do not exist
+        if not index_path.exists() or not docmap_path.exists():
+            raise FileNotFoundError("Index or docmap file not found in cache directory.")
+
+        with index_path.open("rb") as fh:
+            self.index = pickle.load(fh)
+        with docmap_path.open("rb") as fh:
+            self.docmap = pickle.load(fh)
+
+
+
     def save(self) -> None:
         """
         Save the index using the pattern cache/index.pkl
@@ -223,6 +244,7 @@ def main() -> None:
             except FileNotFoundError:
                 print(f"Data file not found: hoopla/data/{args.data_file}")
         case "build":
+
             print("Building inverted index...")
             index = InvertedIndex()
             index.build()
