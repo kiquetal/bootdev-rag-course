@@ -65,6 +65,29 @@ python -m hoopla.cli.keyword_search_cli search <query>
 
 This will search through the data using tokenization, stemming, and return the most relevant results.
 
+### Saving and Loading an Inverted Index (pickle)
+The project now includes a minimal InvertedIndex class and support for saving the index to disk using Python's built-in pickle module.
+
+Example:
+```
+from hoopla.cli.keyword_search_cli import InvertedIndex, load_data
+
+# Build the index from the bundled movies dataset
+records = load_data("movies.json")
+
+idx = InvertedIndex()
+# Populate the document map (expects dict[int, dict])
+for rec in records:
+    doc_id = int(rec.get("id", 0))
+    idx.docmap[doc_id] = rec
+
+# Build postings and save to disk
+idx.build()
+idx.save("index.pkl")
+```
+
+Note: pickle is part of Python's standard library, so you don't need to install anything extra to use it.
+
 ## Next Steps
 - Add vector embeddings for semantic search
 - Implement TF-IDF scoring for better relevance ranking

@@ -15,13 +15,13 @@ class InvertedIndex:
     Minimal inverted index container.
 
     Attributes:
-        index: Mapping from term -> list of document ids containing the term.
+        index: Mapping from term -> set of document ids containing the term.
         docmap: Mapping from document id -> original document payload.
     """
 
     def __init__(self) -> None:
-        self.index: Dict[str, List[int]] = {}
-        self.docmap: Dict[int, List[str]] = {}
+        self.index: Dict[str, set[int]] = {}
+        self.docmap: Dict[int, Dict[str, Any]] = {}
 
     def save(self, filename: str) -> None:
         """
@@ -34,35 +34,70 @@ class InvertedIndex:
             pickle.dump({'index': self.index, 'docmap': self.docmap}, f)
 
 
-    def __add_document(self,doc_id: int, text: str) -> None:
+    def __add_document(self, doc_id: int, text: str) -> None:
         """
         Add a document to the inverted index.
         First tokenize then add each token to the index.
         """
         text_lower = text.lower()
         tokens = text_lower.split()
+
+        # should remove punctuation from tokens
+
+        table = str.maketrans('', '', string.punctuation)
+        tokens = [token.translate(table) for token in tokens]
+        # normalize unicode characters '
+
+
+
+
         tokens = [token for token in tokens if token]  # REMOVE empty tokens
         for token in tokens:
             if token not in self.index:
-                self.index[token] = []
-            if doc_id not in self.index[token]:
-                self.index[token].append(doc_id)
+                self.index[token] = set()
+            # add the doc_id to the set for the index
+            self.index[token].add(doc_id)
+
 
     def get_document(self, term: str) -> List[int]:
         """
         Get list of document ids containing the term.
         """
-        pre_list = self.index.get(term.lower(), [])
-        pre_list.sort()
-        return pre_list
+        postings = self.index.get(term.lower(), set())
+        return sorted(postings)
 
     def build(self)-> None:
         """
         Build the inverted index from the docmap.
         """
-        for doc_id, payload in self.docmap.items():
-            text = payload.get("title", "") + " " + payload.get("description", "")
-            self.__add_document(doc_id, text)
+        data = self.__load_data()
+        for record in data:
+            doc_id = int(record.get("id", 0))
+            title = record.get("title", "")
+            description = record.get("description", "")
+            full_text = f"{title} {description}"
+            self.docmap[doc_id] = record
+            self.__add_document(doc_id, full_text)
+
+
+    def __load_data(self, filename: str = "movies.json") -> List[Dict[str, Any]]:
+        """Load JSON from data directory and sort by id in descending order"""
+
+        base = Path(__file__).resolve().parents[1]  # .../hoopla
+        data_path = base / "data" / filename
+
+
+        with data_path.open("r", encoding="utf-8") as fh:
+            data = json.load(fh)
+
+        # Extract the movies list from the dictionary
+        if isinstance(data, dict) and "movies" in data:
+            data = data["movies"]
+
+        try:
+            return sorted(data, key=lambda x: int(x.get("id", 0)), reverse=False)
+        except:
+            return data
 
 def isPartialMatch(record: str, query: str) -> bool:
     """

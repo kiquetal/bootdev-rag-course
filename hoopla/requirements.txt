@@ -3,3 +3,4 @@ joblib==1.5.2
 nltk==3.9.1
 regex==2025.9.18
 tqdm==4.67.1
+# Note: 'pickle' is part of the Python standard library and does not need to be listed here.
