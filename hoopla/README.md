@@ -20,6 +20,16 @@ This project is part of the Bootdev Retrieval-Augmented Generation (RAG) course.
 - ✅ Implemented stemming using NLTK's PorterStemmer
 - ✅ Enhanced partial token matching to find query terms within document terms
 - ✅ Improved sanitization of text by removing punctuation
+- ✅ Implemented inverted index for efficient search
+- ✅ Added support for limiting search results to top 5 matches
+- ✅ Enhanced search to work with multi-word queries
+
+### Inverted Index Implementation
+- Built an inverted index data structure for faster searching
+- Index maps tokens to document IDs containing those tokens
+- Maintains a document map for quick lookup of movie details
+- Supports saving and loading index state using pickle
+- Applies consistent text processing (stemming, punctuation removal) during indexing and searching
 
 ## Understanding Tokenization and Text Processing
 
@@ -58,12 +68,37 @@ hoopla/
 ```
 
 ## Usage
-To use the search functionality:
+
+### Building the Index
+Before searching, you need to build the inverted index:
+```bash
+python -m hoopla.cli.keyword_search_cli build
 ```
-python -m hoopla.cli.keyword_search_cli search <query>
+This will create the index and save it to the cache directory.
+
+### Searching
+To search using the inverted index:
+```bash
+python -m hoopla.cli.keyword_search_cli search "<your query>"
 ```
 
-This will search through the data using tokenization, stemming, and return the most relevant results.
+Example searches:
+```bash
+# Search for a single word
+python -m hoopla.cli.keyword_search_cli search "brave"
+
+# Search for multiple words
+python -m hoopla.cli.keyword_search_cli search "brave man"
+
+# Search ignoring punctuation
+python -m hoopla.cli.keyword_search_cli search "assault!"
+```
+
+The search will:
+- Remove punctuation from your query
+- Apply stemming to match word variations
+- Return up to 5 most relevant results
+- Show movie IDs and titles for matches
 
 ### Saving and Loading an Inverted Index (pickle)
 The project now includes a minimal InvertedIndex class and support for saving the index to disk using Python's built-in pickle module.
