@@ -238,16 +238,32 @@ def main() -> None:
             try:
                 inverted_index = InvertedIndex()
                 inverted_index.load()
-                query = args.query
-                # iterate over each token in the query and get the postings
-                results: set[int] = set()
-                for token in query.split():
-                    postings = inverted_index.get_documents(token)
-                    results |= set(postings)
+                # Clean query: remove punctuation and convert to lowercase
+                query = args.query.translate(str.maketrans('', '', string.punctuation)).lower()
+                results = set()
+                stemmer = PorterStemmer()
+                # Stem the search token
+                search_stems = [stemmer.stem(token) for token in query.split()]
+
+                for doc_id in inverted_index.docmap:
+                    record = inverted_index.docmap[doc_id]
+                    # Clean and stem the words in the document
+                    description = record.get('description', '').translate(str.maketrans('', '', string.punctuation)).lower()
+                    title = record.get('title', '').translate(str.maketrans('', '', string.punctuation)).lower()
+                    doc_words = description.split() + title.split()
+                    doc_stems = [stemmer.stem(word) for word in doc_words]
+
+                    # Check if any search stem matches document stems
+                    if any(stem in doc_stems for stem in search_stems):
+                        results.add(doc_id)
+
+                    if len(results) >= 5:
+                        results = set(sorted(list(results))[:5])
+                        break
+
                 for doc_id in sorted(results):
                     record = inverted_index.docmap.get(doc_id, {})
                     print(f"ID: {record.get('id', '')}, Title: {record.get('title', '')}")
-
 
             except FileNotFoundError:
                 print(f"Data file not found: hoopla/data/{args.data_file}")
