@@ -249,8 +249,7 @@ def main() -> None:
             index = InvertedIndex()
             index.build()
             index.save()
-            docs = index.get_documents("merida")
-            print(f"First document for token 'merida': {docs[0] if docs else 'No documents found'}")
+            print(f"Inverted index built and saved to cache.")
         case _:
             parser.print_help()
 
