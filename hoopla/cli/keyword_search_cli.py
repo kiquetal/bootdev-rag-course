@@ -236,11 +236,19 @@ def main() -> None:
         case "search":
             print(f"Searching for: {args.query}")
             try:
-                records = load_data(args.data_file)
-                results = search_records(records, args.query)
-                print(f"Found {len(results)} matching records")
-                for idx, record in enumerate(results[:5], 1):
-                    print(f"{idx}. {record.get('title')}")
+                inverted_index = InvertedIndex()
+                inverted_index.load()
+                query = args.query
+                # iterate over each token in the query and get the postings
+                results: set[int] = set()
+                for token in query.split():
+                    postings = inverted_index.get_documents(token)
+                    results |= set(postings)
+                for doc_id in sorted(results):
+                    record = inverted_index.docmap.get(doc_id, {})
+                    print(f"ID: {record.get('id', '')}, Title: {record.get('title', '')}")
+
+
             except FileNotFoundError:
                 print(f"Data file not found: hoopla/data/{args.data_file}")
         case "build":
