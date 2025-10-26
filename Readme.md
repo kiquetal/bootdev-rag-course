@@ -19,3 +19,55 @@ Quick start:
 - Support for saving and loading index to disk using Python's pickle module
 - Document mapping for fast document retrieval
 
+## Project Setup
+
+### Setting up with uv (Recommended)
+
+uv is a fast Python package installer and virtual environment manager. Here's how to get started:
+
+1. **Install uv:**
+```bash
+pip install uv
+```
+
+2. **Create and activate a virtual environment:**
+```bash
+uv venv
+source .venv/bin/activate  # On Unix/macOS
+# OR
+.venv\Scripts\activate  # On Windows
+```
+
+3. **Install dependencies:**
+```bash
+uv pip install -r requirements.txt
+```
+
+4. **Add new dependencies:**
+```bash
+uv pip install package_name
+uv pip freeze > requirements.txt
+```
+
+### Project Standards
+
+1. **Dependencies Management:**
+   - Use `requirements.txt` for package dependencies
+   - Use `uv.lock` for dependency locking (automatically managed by uv)
+   - Always update requirements.txt after adding new packages
+
+2. **Virtual Environment:**
+   - Never commit .venv directory
+   - Always use virtual environment when developing
+   - One virtual environment per project
+
+3. **Package Structure:**
+   - Keep code in the `hoopla/` directory
+   - Tests in `tests/` directory
+   - Configuration in project root
+
+4. **Code Style:**
+   - Follow PEP 8 guidelines
+   - Use type hints
+   - Document functions and classes
+   - Keep functions focused and small
