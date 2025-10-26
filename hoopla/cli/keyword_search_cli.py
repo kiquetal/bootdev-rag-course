@@ -312,6 +312,8 @@ def main() -> None:
     tf_parser.add_argument("doc_id", type=int, help="Document ID")
     tf_parser.add_argument("term", type=str, help="Term to get frequency for")
 
+    idf_parser = subparsers.add_parser("idf", help="Get inverse document frequency for a term")
+    idf_parser.add_argument("term", type=str, help="Term to get IDF for")
 
 
     args = parser.parse_args()
@@ -368,6 +370,29 @@ def main() -> None:
             except ValueError as e:
                 print(e)
 
+        case "idf":
+            try:
+                inverted_index = InvertedIndex()
+                inverted_index.load()
+                term = args.term
+                # Clean the term
+                table = str.maketrans('', '', string.punctuation)
+                cleaned_term = term.lower().translate(table)
+                # Stem the term
+                stemmer = PorterStemmer()
+                stemmed_term = stemmer.stem(cleaned_term)
+
+                # Calculate document frequency
+                doc_freq = len(inverted_index.index.get(stemmed_term, []))
+                total_docs = len(inverted_index.docmap)
+                if doc_freq == 0:
+                    print(f"Term '{term}' not found in any document.")
+                else:
+                    import math
+                    idf = math.log((total_docs +1) / (doc_freq + 1) )
+                    print(f"Inverse Document Frequency (IDF) of '{term}': {idf:.2f}")
+            except ValueError     as e:
+                print(e)
         case _:
             parser.print_help()
 
