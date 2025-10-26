@@ -23,7 +23,7 @@ class InvertedIndex:
     def __init__(self) -> None:
         self.index: Dict[str, set[int]] = {}
         self.docmap: Dict[int, Dict[str, Any]] = {}
-        self.term_frequency: Counter = Counter()
+        self.term_frequency: Dict[int, Counter[str]] = {}
 
     def load(self):
         """
@@ -84,7 +84,7 @@ class InvertedIndex:
         tokens = [token for token in tokens if token]  # REMOVE empty tokens
 
         token_counts = Counter(tokens)
-        self.term_frequency.update(token_counts)
+        self.term_frequency[doc_id]= token_counts
 
         for token in tokens:
             if token not in self.index:
