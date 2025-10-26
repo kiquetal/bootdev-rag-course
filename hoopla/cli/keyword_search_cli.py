@@ -53,7 +53,7 @@ class InvertedIndex:
         """
         Save the index using the pattern cache/index.pkl
         Save the docmap using the pattern cache/docmap.pkl
-
+        Save term_frequency using the pattern cache/term_frequency.pkl
 
         """
         # check if cache directory exists
@@ -63,16 +63,18 @@ class InvertedIndex:
             cache_path.mkdir(parents=True, exist_ok=True)
         index_path = cache_path / "index.pkl"
         docmap_path = cache_path / "docmap.pkl"
+        termfreq_path = cache_path / "term_frequency.pkl"
         with index_path.open("wb") as fh:
             pickle.dump(self.index, fh)
         with docmap_path.open("wb") as fh:
             pickle.dump(self.docmap, fh)
-
+        with termfreq_path.open("wb") as fh:
+            pickle.dump(self.term_frequency, fh)
 
     def __add_document(self, doc_id: int, text: str) -> None:
         """
         Add a document to the inverted index.
-        First tokenize then add each token to the index.
+        First tokenize then add each token to thke index.
         """
         text_lower = text.lower()
         tokens = text_lower.split()
