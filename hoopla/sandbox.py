@@ -48,3 +48,37 @@ print(f"Tokens in doc1: {dict(doc1_counter)}")
 print(f"Tokens in doc2: {dict(doc2_counter)}")
 print(f"Sum of frequencies: {dict(doc1_counter + doc2_counter)}")
 print(f"Tokens common to both docs: {dict(doc1_counter & doc2_counter)}")
+
+print("\nExample: Understanding Document ID and Token Counting")
+print("-" * 50)
+
+# Each document has an ID and some text
+documents = {
+    101: "the cat and the dog",
+    102: "the cat was quick",
+    103: "dog and dog run"
+}
+
+# We'll store token frequencies for each document ID
+doc_frequencies = {}
+
+# Process each document
+for doc_id, text in documents.items():
+    tokens = text.lower().split()
+    # Create a Counter for this specific document
+    doc_frequencies[doc_id] = Counter(tokens)
+
+    print(f"\nDocument ID: {doc_id}")
+    print(f"Text: {text}")
+    print(f"Token frequencies in this document:")
+    print(f"  {dict(doc_frequencies[doc_id])}")
+
+print("\nAccessing specific token counts:")
+# For document 101, how many times does "the" appear?
+print(f"'the' appears {doc_frequencies[101]['the']} times in document 101")
+# For document 103, how many times does "dog" appear?
+print(f"'dog' appears {doc_frequencies[103]['dog']} times in document 103")
+
+print("\nMost common tokens per document:")
+for doc_id in documents:
+    print(f"Document {doc_id}: {doc_frequencies[doc_id].most_common(2)}")

@@ -83,10 +83,20 @@ class InvertedIndex:
 
         tokens = [token for token in tokens if token]  # REMOVE empty tokens
 
+        # remove token from stopwords
+        base = Path(__file__).resolve().parents[1]  # .../hoop
+        stopwords_path = base / "data" / "stopwords.txt"
+        with stopwords_path.open("r", encoding="utf-8") as fh:
+            stopwords = set(line.strip() for line in fh)
+
+
+
         token_counts = Counter(tokens)
         self.term_frequency[doc_id]= token_counts
 
         for token in tokens:
+            if token not in stopwords:
+                continue
             if token not in self.index:
                 self.index[token] = set()
             # add the doc_id to the set for the index
