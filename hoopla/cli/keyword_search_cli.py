@@ -97,6 +97,7 @@ class InvertedIndex:
 
 
         token_counts = Counter(tokens)
+        # store the token counts for this document
         self.term_frequency[doc_id]= token_counts
 
         for token in tokens:
@@ -301,7 +302,7 @@ def main() -> None:
 
             print("Building inverted index...")
             index = InvertedIndex()
-            index.load()
+            index.build()
             index.save()
             print(f"Inverted index built and saved to cache.")
         case _:
