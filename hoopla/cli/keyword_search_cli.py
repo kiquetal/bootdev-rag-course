@@ -74,33 +74,36 @@ class InvertedIndex:
     def __add_document(self, doc_id: int, text: str) -> None:
         """
         Add a document to the inverted index.
-        First tokenize then add each token to thke index.
+        First tokenize, clean, stem, then add each token to the index.
         """
+        # Initialize stemmer
+        stemmer = PorterStemmer()
+
         text_lower = text.lower()
         tokens = text_lower.split()
 
-        # should remove punctuation from tokens
+        # Remove punctuation from tokens
         table = str.maketrans('', '', string.punctuation)
         tokens = [token.translate(table) for token in tokens]
-        # replace the ` with '
         tokens = [token.replace('`', "'") for token in tokens]
-        tokens = [token for token in tokens if token]  # REMOVE empty tokens
+        tokens = [token for token in tokens if token]  # Remove empty tokens
 
-        # remove token from stopwords
-        base = Path(__file__).resolve().parents[1]  # .../hoop
+        # Remove stopwords
+        base = Path(__file__).resolve().parents[1]
         stopwords_path = base / "data" / "stopwords.txt"
         with stopwords_path.open("r", encoding="utf-8") as fh:
             stopwords = set(line.strip() for line in fh)
 
-        # Filter out stopwords before creating Counter
+        # Filter stopwords and stem the tokens
         filtered_tokens = [token for token in tokens if token not in stopwords]
+        stemmed_tokens = [stemmer.stem(token) for token in filtered_tokens]
 
-        # Create Counter only with non-stopword tokens
-        token_counts = Counter(filtered_tokens)
+        # Create Counter with stemmed tokens
+        token_counts = Counter(stemmed_tokens)
         self.term_frequency[doc_id] = token_counts
 
-        # Add to inverted index (this part already correctly filters stopwords)
-        for token in filtered_tokens:
+        # Add stemmed tokens to inverted index
+        for token in stemmed_tokens:
             if token not in self.index:
                 self.index[token] = set()
             self.index[token].add(doc_id)
@@ -115,17 +118,32 @@ class InvertedIndex:
         if not term:
             return []
 
-        # follow the same transform steps used in __add_document
+        # Initialize stemmer
+        stemmer = PorterStemmer()
+
+        # Follow the same transform steps used in __add_document
         term_lower = term.lower()
         tokens = term_lower.split()
 
+        # Clean tokens
         table = str.maketrans('', '', string.punctuation)
         tokens = [token.translate(table) for token in tokens]
         tokens = [token.replace('`', "'") for token in tokens]
         tokens = [token for token in tokens if token]  # remove empty tokens
 
+        # Remove stopwords
+        base = Path(__file__).resolve().parents[1]
+        stopwords_path = base / "data" / "stopwords.txt"
+        with stopwords_path.open("r", encoding="utf-8") as fh:
+            stopwords = set(line.strip() for line in fh)
+
+        # Filter stopwords and stem the tokens
+        filtered_tokens = [token for token in tokens if token not in stopwords]
+        stemmed_tokens = [stemmer.stem(token) for token in filtered_tokens]
+
+        # Get postings for stemmed tokens
         postings: set[int] = set()
-        for token in tokens:
+        for token in stemmed_tokens:
             postings |= self.index.get(token, set())
 
         return sorted(postings)
@@ -163,16 +181,31 @@ class InvertedIndex:
         except:
             return data
 
-def get_tf(self, doc_id: int, term: str) -> int:
+    def get_tf(self, doc_id: int, term: str) -> int:
         """
         Get the term frequency of a term in a specific document.
+        The term will be stemmed before lookup since we store stemmed terms.
         """
-        # check if term contains more than one token
-        print(f"The document content is : {self.docmap.get(doc_id, {})}")
-        print(f"The term frequency data is : {self.term_frequency.get(doc_id, {})}")
         if ' ' in term:
             raise ValueError("Term frequency can only be retrieved for single tokens.")
-        return self.term_frequency[doc_id].get(term, 0)
+
+        # Initialize stemmer and process the term
+        stemmer = PorterStemmer()
+        term_lower = term.lower()
+
+        # Clean the term
+        table = str.maketrans('', '', string.punctuation)
+        cleaned_term = term_lower.translate(table)
+        cleaned_term = cleaned_term.replace('`', "'")
+
+        if not cleaned_term:
+            return 0
+
+        # Stem the term
+        stemmed_term = stemmer.stem(cleaned_term)
+
+        # Look up frequency of stemmed term
+        return self.term_frequency[doc_id].get(stemmed_term, 0)
 
 def isPartialMatch(record: str, query: str) -> bool:
     """
@@ -247,6 +280,22 @@ def search_records(records: List[Dict[str, Any]], query: str) -> List[Dict[str, 
             results.append(record)
 
     return sorted(results, key=lambda x: int(x.get("id", 0)))
+def get_tf(inverted_index: InvertedIndex, doc_id: int, term: str) -> int:
+    """
+    Get the term frequency of a term in a specific document using the inverted index.
+    """
+    if doc_id not in inverted_index.docmap:
+        raise ValueError(f"Document ID {doc_id} not found in docmap.")
+
+    # Clean the term
+    table = str.maketrans('', '', string.punctuation)
+    cleaned_term = term.lower().translate(table)
+    ## Use the PorterStemmer to stem the term
+    stemmer = PorterStemmer()
+    stemmed_term = stemmer.stem(cleaned_term)
+    ## Get the frequency from the inverted index
+    frequency = inverted_index.get_tf(doc_id, stemmed_term)
+    return frequency
 def main() -> None:
     parser = argparse.ArgumentParser(description="Simple Keyword Search CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
