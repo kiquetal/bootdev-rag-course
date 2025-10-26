@@ -10,7 +10,7 @@ class InvertedIndexExample:
         # Store term frequencies per document: doc_id -> Counter of terms
         self.term_frequencies: Dict[int, Counter] = {}
 
-    def __add_document(self, doc_id: int, text: str) -> None:
+    def add_document(self, doc_id: int, text: str) -> None:
         """
         Demonstrates how to count token frequencies for a specific document
 
@@ -32,7 +32,7 @@ class InvertedIndexExample:
             self.index[token].add(doc_id)
 
 # Example usage:
-print("\nDemonstrating __add_document with Counter:")
+print("\nDemonstrating add_document with Counter:")
 print("-" * 50)
 
 index = InvertedIndexExample()
@@ -44,7 +44,7 @@ documents = {
 }
 
 for doc_id, text in documents.items():
-    index.__add_document(doc_id, text)
+    index.add_document(doc_id, text)
     print(f"\nDocument {doc_id} added:")
     print(f"Text: {text}")
     print(f"Term frequencies for this document:")
