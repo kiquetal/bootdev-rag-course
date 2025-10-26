@@ -5,7 +5,7 @@ import json
 import string
 import pickle
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Counter
 from nltk.stem import PorterStemmer
 
 
@@ -17,11 +17,13 @@ class InvertedIndex:
     Attributes:
         index: Mapping from term -> set of document ids containing the term.
         docmap: Mapping from document id -> original document payload.
+        term_frequency: Mapping from term -> frequency count across all documents.
     """
 
     def __init__(self) -> None:
         self.index: Dict[str, set[int]] = {}
         self.docmap: Dict[int, Dict[str, Any]] = {}
+        self.term_frequency: Counter = Counter()
 
     def load(self):
         """
@@ -80,6 +82,10 @@ class InvertedIndex:
         tokens = [token.replace('`', "'") for token in tokens]
 
         tokens = [token for token in tokens if token]  # REMOVE empty tokens
+
+        token_counts = Counter(tokens)
+        self.term_frequency.update(token_counts)
+
         for token in tokens:
             if token not in self.index:
                 self.index[token] = set()
