@@ -80,12 +80,10 @@ class InvertedIndex:
         tokens = text_lower.split()
 
         # should remove punctuation from tokens
-
         table = str.maketrans('', '', string.punctuation)
         tokens = [token.translate(table) for token in tokens]
         # replace the ` with '
         tokens = [token.replace('`', "'") for token in tokens]
-
         tokens = [token for token in tokens if token]  # REMOVE empty tokens
 
         # remove token from stopwords
@@ -94,18 +92,17 @@ class InvertedIndex:
         with stopwords_path.open("r", encoding="utf-8") as fh:
             stopwords = set(line.strip() for line in fh)
 
+        # Filter out stopwords before creating Counter
+        filtered_tokens = [token for token in tokens if token not in stopwords]
 
+        # Create Counter only with non-stopword tokens
+        token_counts = Counter(filtered_tokens)
+        self.term_frequency[doc_id] = token_counts
 
-        token_counts = Counter(tokens)
-        # store the token counts for this document
-        self.term_frequency[doc_id]= token_counts
-
-        for token in tokens:
-            if token in stopwords:
-                continue
+        # Add to inverted index (this part already correctly filters stopwords)
+        for token in filtered_tokens:
             if token not in self.index:
                 self.index[token] = set()
-            # add the doc_id to the set for the index
             self.index[token].add(doc_id)
 
 
@@ -171,6 +168,8 @@ def get_tf(self, doc_id: int, term: str) -> int:
         Get the term frequency of a term in a specific document.
         """
         # check if term contains more than one token
+        print(f"The document content is : {self.docmap.get(doc_id, {})}")
+        print(f"The term frequency data is : {self.term_frequency.get(doc_id, {})}")
         if ' ' in term:
             raise ValueError("Term frequency can only be retrieved for single tokens.")
         return self.term_frequency[doc_id].get(term, 0)
@@ -260,6 +259,11 @@ def main() -> None:
     build_parser.add_argument("--data-file", type=str, default="movies.json",
                               help="JSON filename located in hoopla/data (default: movies.json)")
 
+    tf_parser = subparsers.add_parser("tf", help="Get term frequency for a term in a document")
+    tf_parser.add_argument("doc_id", type=int, help="Document ID")
+    tf_parser.add_argument("term", type=str, help="Term to get frequency for")
+
+
 
     args = parser.parse_args()
 
@@ -305,6 +309,16 @@ def main() -> None:
             index.build()
             index.save()
             print(f"Inverted index built and saved to cache.")
+
+        case "tf":
+            try:
+                inverted_index = InvertedIndex()
+                inverted_index.load()
+                frequency = get_tf(inverted_index, args.doc_id, args.term)
+                print(f"Term frequency of '{args.term}' in document {args.doc_id}: {frequency}")
+            except ValueError as e:
+                print(e)
+
         case _:
             parser.print_help()
 
