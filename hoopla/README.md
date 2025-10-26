@@ -28,8 +28,34 @@ This project is part of the Bootdev Retrieval-Augmented Generation (RAG) course.
 - Built an inverted index data structure for faster searching
 - Index maps tokens to document IDs containing those tokens
 - Maintains a document map for quick lookup of movie details
+- Implements term frequency tracking using Python's Counter collection
 - Supports saving and loading index state using pickle
 - Applies consistent text processing (stemming, punctuation removal) during indexing and searching
+
+#### Term Frequency Implementation
+The inverted index now includes term frequency tracking using Python's Counter collection:
+
+1. **What is Term Frequency?**
+   - Counts how many times each token appears in a document
+   - Stored per document using Python's Counter class
+   - Uses stemmed tokens for consistent counting
+
+2. **Counter Implementation Details:**
+   - Each document has its own Counter object
+   - Tokens are stemmed before counting
+   - Stopwords are removed before counting
+   - Frequencies are stored with stemmed terms as keys
+
+3. **Benefits of Using Counter:**
+   - Efficient counting of term occurrences
+   - Easy access to term frequencies
+   - Built-in methods for most common terms
+   - Automatic handling of new terms
+
+4. **How it's used in the code:**
+   - During indexing: Creates Counter per document
+   - During search: Access term frequencies for ranking
+   - For term frequency queries: Quick lookups of specific terms
 
 ## Understanding Tokenization and Text Processing
 
@@ -99,6 +125,28 @@ The search will:
 - Apply stemming to match word variations
 - Return up to 5 most relevant results
 - Show movie IDs and titles for matches
+
+### Term Frequency Lookup
+To check how many times a term appears in a specific document:
+```bash
+python -m hoopla.cli.keyword_search_cli tf <doc_id> "<term>"
+```
+
+Example:
+```bash
+# Check frequency of "brave" in document 1
+python -m hoopla.cli.keyword_search_cli tf 1 "brave"
+
+# Note: Terms are stemmed before lookup, so different forms of a word will match
+# For example, "running" will match with "run"
+python -m hoopla.cli.keyword_search_cli tf 1 "running"
+```
+
+Note: The term frequency command:
+- Stems the input term (e.g., "running" becomes "run")
+- Removes punctuation and converts to lowercase
+- Returns the frequency of the stemmed term in the specified document
+- Only works with single tokens (not phrases)
 
 ### Saving and Loading an Inverted Index (pickle)
 The project now includes a minimal InvertedIndex class and support for saving the index to disk using Python's built-in pickle module.
