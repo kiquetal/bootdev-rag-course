@@ -165,6 +165,15 @@ class InvertedIndex:
         except:
             return data
 
+def get_tf(self, doc_id: int, term: str) -> int:
+        """
+        Get the term frequency of a term in a specific document.
+        """
+        # check if term contains more than one token
+        if ' ' in term:
+            raise ValueError("Term frequency can only be retrieved for single tokens.")
+        return self.term_frequency[doc_id].get(term, 0)
+
 def isPartialMatch(record: str, query: str) -> bool:
     """
     Check if the query is a partial match in the title or description of the record.
@@ -292,7 +301,7 @@ def main() -> None:
 
             print("Building inverted index...")
             index = InvertedIndex()
-            index.build()
+            index.load()
             index.save()
             print(f"Inverted index built and saved to cache.")
         case _:

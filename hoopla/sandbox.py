@@ -1,4 +1,64 @@
 from collections import Counter
+from typing import Dict, Any, Set
+
+class InvertedIndexExample:
+    def __init__(self):
+        # Main inverted index: token -> set of doc_ids
+        self.index: Dict[str, Set[int]] = {}
+        # Store document metadata
+        self.docmap: Dict[int, Dict[str, Any]] = {}
+        # Store term frequencies per document: doc_id -> Counter of terms
+        self.term_frequencies: Dict[int, Counter] = {}
+
+    def __add_document(self, doc_id: int, text: str) -> None:
+        """
+        Demonstrates how to count token frequencies for a specific document
+
+        Args:
+            doc_id: The ID of the document
+            text: The text content of the document
+        """
+        # Convert to lowercase and split into tokens
+        tokens = text.lower().split()
+
+        # Create a new Counter for this specific document ID
+        # This will automatically count all occurrences of each token
+        self.term_frequencies[doc_id] = Counter(tokens)
+
+        # Add to inverted index
+        for token in tokens:
+            if token not in self.index:
+                self.index[token] = set()
+            self.index[token].add(doc_id)
+
+# Example usage:
+print("\nDemonstrating __add_document with Counter:")
+print("-" * 50)
+
+index = InvertedIndexExample()
+
+# Add some sample documents
+documents = {
+    1: "the brave cat and the brave dog",
+    2: "the quick cat was brave",
+}
+
+for doc_id, text in documents.items():
+    index.__add_document(doc_id, text)
+    print(f"\nDocument {doc_id} added:")
+    print(f"Text: {text}")
+    print(f"Term frequencies for this document:")
+    print(dict(index.term_frequencies[doc_id]))
+
+print("\nFinal term frequencies per document:")
+for doc_id, frequencies in index.term_frequencies.items():
+    print(f"\nDocument {doc_id}:")
+    print(f"- Most common terms: {frequencies.most_common(2)}")
+    print(f"- Count of 'brave': {frequencies['brave']}")
+    print(f"- Count of 'the': {frequencies['the']}")
+
+print("\nInverted index contents:")
+print(dict(index.index))
 
 # Example 1: Basic Counter usage with a list
 fruits = ['apple', 'banana', 'apple', 'orange', 'banana', 'apple']
