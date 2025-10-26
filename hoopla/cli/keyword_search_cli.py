@@ -29,21 +29,24 @@ class InvertedIndex:
         """
         Load the index from the pattern cache/index.pkl
         Load the docmap from the pattern cache/docmap.pkl
+        Load term_frequency from cache/term_frequency.pkl
         """
         base = Path(__file__).resolve().parents[1]  # .../hoop
         cache_path = base / "cache"
         index_path = cache_path / "index.pkl"
         docmap_path = cache_path / "docmap.pkl"
+        termfreq_path = cache_path / "term_frequency.pkl"
 
         # Raise error if files do not exist
-        if not index_path.exists() or not docmap_path.exists():
-            raise FileNotFoundError("Index or docmap file not found in cache directory.")
+        if not index_path.exists() or not docmap_path.exists() or not termfreq_path.exists():
+            raise FileNotFoundError("Index or docmap or termfreq file not found in cache directory.")
 
         with index_path.open("rb") as fh:
             self.index = pickle.load(fh)
         with docmap_path.open("rb") as fh:
             self.docmap = pickle.load(fh)
-
+        with termfreq_path.open("rb") as fh:
+            self.term_frequency = pickle.load(fh)
 
 
     def save(self) -> None:
@@ -95,7 +98,7 @@ class InvertedIndex:
         self.term_frequency[doc_id]= token_counts
 
         for token in tokens:
-            if token not in stopwords:
+            if token in stopwords:
                 continue
             if token not in self.index:
                 self.index[token] = set()
