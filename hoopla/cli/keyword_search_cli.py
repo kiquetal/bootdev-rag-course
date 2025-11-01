@@ -356,7 +356,7 @@ def main() -> None:
 
     tfidf_parser = subparsers.add_parser("tfidf", help="Get TF-IDF for a term in a document")
     tfidf_parser.add_argument("doc_id", type=int, help="Document ID")
-    tfidf_parser.add_argument("term", type=str, help="Term to get TF-IDF for")
+    tfidf_parser.add_argument("terms", type=str, help="Term(s) to get TF-IDF for (space-separated)")
 
 
 
@@ -441,15 +441,22 @@ def main() -> None:
         case "tfidf":
             try:
                 document_id = args.doc_id
-                term = args.term
+                terms = args.terms
                 inverted_index = InvertedIndex()
                 inverted_index.load()
-                tf = get_tf(inverted_index, document_id, term)
-                idf = inverted_index.get_idf(term)
-                tfidf = tf * idf
-                print(f"TF-IDF score of '{term}' in document {document_id}: {tfidf:.2f}")
+                # terms could be multiple words
+                tfidf = 0
+                for term in terms.split():
+                    # Get term frequency
+                    tf = inverted_index.get_tf(document_id, term)
+                    idf = inverted_index.get_idf(term)
+                    tfidf += tf * idf
+                print(f"TF-IDF of '{terms}' in document {document_id}: {tfidf:.2f}")
             except ValueError as e:
                 print(e)
+                return
+
+
         case _:
             parser.print_help()
 
