@@ -14,6 +14,28 @@ Quick start:
 - Stemming using NLTK's PorterStemmer
 - Enhanced partial token matching
 
+### TF-IDF Implementation
+- Term Frequency (TF): Measures how frequently a term appears in a document
+  - Implemented using Counter collection for efficient token counting
+  - Normalizes text by removing punctuation and applying stemming
+  - Excludes stopwords for better relevance
+
+- Inverse Document Frequency (IDF): Measures how important a term is across all documents
+  - Calculated using the formula: log((N + 1) / (df + 1))
+  - N is the total number of documents
+  - df is the document frequency (number of documents containing the term)
+  - The +1 in formula provides smoothing to handle edge cases
+
+- TF-IDF Score: Combines TF and IDF to rank document relevance
+  - Higher scores indicate terms that are both frequent in a document and rare across all documents
+  - Used to identify distinctive terms in documents
+
+### Command Line Interface
+- Search documents: `uv run cli/keyword_search_cli.py search "query"`
+- Calculate term frequency: `uv run cli/keyword_search_cli.py tf doc_id term`
+- Get IDF score: `uv run cli/keyword_search_cli.py idf term`
+- Calculate TF-IDF: `uv run cli/keyword_search_cli.py tfidf doc_id term`
+
 ### Inverted Index
 - Minimal InvertedIndex class for efficient search
 - Support for saving and loading index to disk using Python's pickle module
