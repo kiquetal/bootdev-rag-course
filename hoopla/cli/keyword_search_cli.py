@@ -207,6 +207,43 @@ class InvertedIndex:
         # Look up frequency of stemmed term
         return self.term_frequency[doc_id].get(stemmed_term, 0)
 
+
+    def get_idf(self, term: str) -> float:
+        """
+        Get the inverse document frequency (IDF) of a term.
+        IDF = log((N + 1) / (df + 1)) where N is total number of documents,
+        and df is document frequency of the term.
+        """
+        import math
+
+        if ' ' in term:
+            raise ValueError("IDF can only be calculated for single tokens.")
+
+        # Initialize stemmer and process the term
+        stemmer = PorterStemmer()
+        term_lower = term.lower()
+
+        # Clean the term
+        table = str.maketrans('', '', string.punctuation)
+        cleaned_term = term_lower.translate(table)
+        cleaned_term = cleaned_term.replace('`', "'")
+
+        if not cleaned_term:
+            return 0.0
+
+        # Stem the term
+        stemmed_term = stemmer.stem(cleaned_term)
+
+        # Calculate document frequency
+        doc_freq = len(self.index.get(stemmed_term, []))
+        total_docs = len(self.docmap)
+
+        if doc_freq == 0:
+            return 0.0
+
+        idf = math.log((total_docs + 1) / (doc_freq + 1))
+        return idf
+
 def isPartialMatch(record: str, query: str) -> bool:
     """
     Check if the query is a partial match in the title or description of the record.
@@ -280,6 +317,8 @@ def search_records(records: List[Dict[str, Any]], query: str) -> List[Dict[str, 
             results.append(record)
 
     return sorted(results, key=lambda x: int(x.get("id", 0)))
+
+
 def get_tf(inverted_index: InvertedIndex, doc_id: int, term: str) -> int:
     """
     Get the term frequency of a term in a specific document using the inverted index.
@@ -403,6 +442,12 @@ def main() -> None:
             try:
                 document_id = args.doc_id
                 term = args.term
+                inverted_index = InvertedIndex()
+                inverted_index.load()
+                tf = get_tf(inverted_index, document_id, term)
+                idf = inverted_index.get_idf(term)
+                tfidf = tf * idf
+                print(f"TF-IDF score of '{term}' in document {document_id}: {tfidf:.2f}")
             except ValueError as e:
                 print(e)
         case _:
