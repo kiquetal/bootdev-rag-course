@@ -315,6 +315,11 @@ def main() -> None:
     idf_parser = subparsers.add_parser("idf", help="Get inverse document frequency for a term")
     idf_parser.add_argument("term", type=str, help="Term to get IDF for")
 
+    tfidf_parser = subparsers.add_parser("tfidf", help="Get TF-IDF for a term in a document")
+    tfidf_parser.add_argument("doc_id", type=int, help="Document ID")
+    tfidf_parser.add_argument("term", type=str, help="Term to get TF-IDF for")
+
+
 
     args = parser.parse_args()
 
@@ -392,6 +397,13 @@ def main() -> None:
                     idf = math.log((total_docs +1) / (doc_freq + 1) )
                     print(f"Inverse Document Frequency (IDF) of '{term}': {idf:.2f}")
             except ValueError     as e:
+                print(e)
+
+        case "tfidf":
+            try:
+                document_id = args.doc_id
+                term = args.term
+            except ValueError as e:
                 print(e)
         case _:
             parser.print_help()
